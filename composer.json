@@ -1,0 +1,17 @@
+{
+  "name": "crazzy501/creative",
+  "description": "creative project for home use",
+  "minimum-stability": "stable",
+  "license": "",
+  "authors": [
+    {
+      "name": "Antony Kuznetsov",
+      "email": "crazzy501@yandex.ru"
+    }
+  ],
+  "autoload": {
+    "psr-4": {
+      "Core\\": "core/lib"
+    }
+  }
+}
