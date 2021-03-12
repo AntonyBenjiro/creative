@@ -11,8 +11,8 @@ abstract class ConfigElement implements iConfig
 
 	private $values=array();
 
-	public function __construct($configName){
-		$configPath=CONFIG_DIR.'/'.$configName.'.ini';
+	public function __construct($configName,$configDir=CONFIG_DIR){
+		$configPath=$configDir.'/'.$configName.'.ini';
 		if(!($values=parse_ini_file($configPath))){
 			throw new \Exception("Can't read values from '{$configPath}'");
 		}

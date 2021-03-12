@@ -18,4 +18,9 @@ abstract class ToolsString
 		}
 		return implode('_', $ret);
 	}
+
+	public static function removeNamespaceFromClassName($classname){
+		$class=explode('\\',$classname);
+		return end($class);
+	}
 }

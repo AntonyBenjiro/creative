@@ -55,6 +55,7 @@ class MySQLiManager implements iDataManager
 		if(!($result=$this->mysqli->query($q))){
 			throw new MySQLi($this->mysqli,$q);
 		}
+
 		return $result->fetch_assoc();
 	}
 
