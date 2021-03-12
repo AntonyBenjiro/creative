@@ -21,6 +21,9 @@ class DB
 
 	protected function __construct(){
 		$dataManager=Config::get('DataManager')->value('class');
+		if(!class_exists($dataManager)){
+			throw new \Exception("'{$dataManager}' class not exists");
+		}
 		$this->dataManager=new $dataManager;
 	}
 
@@ -39,5 +42,9 @@ class DB
 	 */
 	public function saveData($dataClass,array $properties){
 		return $this->dataManager->saveData($dataClass,$properties);
+	}
+
+	public function getData($dataClass,$idKey){
+		return $this->dataManager->getData($dataClass,$idKey);
 	}
 }

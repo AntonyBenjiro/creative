@@ -12,7 +12,16 @@ abstract class DataElement implements iEntity
 {
 	private $properties=array();
 
+	/**
+	 * DataElement constructor.
+	 * @param mixed ...$properties
+	 * @throws \Exception
+	 */
 	public function __construct(...$properties){
+		$idKey=strtoupper(ToolsString::camelToSnake(basename(self::class))).'_ID';
+		if(isset($properties[$idKey])&&count($properties)===1){
+			$properties=DB::get()->getData($this->dataClass(),$idKey);
+		}
 		foreach($properties as $k=>$v){
 			$this->properties[$k]=$v;
 		}

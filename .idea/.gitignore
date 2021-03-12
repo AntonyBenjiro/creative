@@ -6,3 +6,5 @@
 /vcs.xml
 /jsonSchemas.xml
 /php.xml
+/inspectionProfiles/Project_Default.xml
+/sqldialects.xml
