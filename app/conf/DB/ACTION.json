@@ -1,0 +1,9 @@
+{
+  "tableName": "ACTION",
+  "fields": {
+    "USER_ID": {},
+    "ACTION_TYPE_ID": {},
+    "TIMESTAMP": {},
+    "QUERY": {}
+  }
+}

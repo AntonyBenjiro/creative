@@ -1,0 +1,8 @@
+{
+  "class":"Core\\DB\\MySQLiManager",
+  "transactions": 1,
+  "host": "localhost",
+  "user": "some_user",
+  "pwd": "some_pwd",
+  "db": "some_db"
+}
