@@ -18,7 +18,7 @@ abstract class DataElement implements iEntity
 	 * @throws \Exception
 	 */
 	public function __construct(...$properties){
-		$idKey=strtoupper(ToolsString::camelToSnake(basename(self::class))).'_ID';
+		$idKey=strtoupper(ToolsString::camelToSnake(ToolsString::removeNamespaceFromClassName(self::class))).'_ID';
 		if(isset($properties[$idKey])&&count($properties)===1){
 			$properties=DB::get()->getData($this->dataClass(),$idKey);
 		}
@@ -32,7 +32,7 @@ abstract class DataElement implements iEntity
 	 * @throws \Exception
 	 */
 	private function dataClass(){
-		return strtoupper(ToolsString::camelToSnake(basename(self::class)));
+		return strtoupper(ToolsString::camelToSnake(ToolsString::removeNamespaceFromClassName(self::class)));
 	}
 
 	/**

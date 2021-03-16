@@ -6,20 +6,22 @@ namespace Core;
 
 use Core\IFace\iConfig;
 
-abstract class ConfigElement implements iConfig
+class ConfigElement implements iConfig
 {
 
-	private $values=array();
+	protected $values=array();
+	private $configName;
 
-	public function __construct($configName){
-		$configPath=CONFIG_DIR.'/'.$configName.'.ini';
-		if(!($values=parse_ini_file($configPath))){
+	public function __construct($configName,$configDir=CONFIG_DIR){
+		$configPath=$_SERVER['DOCUMENT_ROOT'].$configDir.'/'.$configName.'.ini';
+		if(!($values=parse_ini_file($configPath,true))){
 			throw new \Exception("Can't read values from '{$configPath}'");
 		}
 		$this->values=$values;
+		$this->configName=$configName;
 	}
 
 	public function value($valueName){
-		return $this->values[$valueName]?:'';
+		return isset($this->values[$valueName])?$this->values[$valueName]:'';
 	}
 }

@@ -47,4 +47,8 @@ class DB
 	public function getData($dataClass,$idKey){
 		return $this->dataManager->getData($dataClass,$idKey);
 	}
+
+	public function query($sql){
+		return $this->dataManager->query($sql);
+	}
 }

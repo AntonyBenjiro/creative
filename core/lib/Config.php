@@ -29,10 +29,11 @@ class Config
 	/**
 	 * @param string $configName
 	 * @return iConfig
+	 * @throws \Exception
 	 */
 	private function getConfig($configName){
-		if(!$this->loadedConfigs[$configName]){
-			$this->loadedConfigs[$configName]=new $configName($configName);
+		if(!isset($this->loadedConfigs[$configName])){
+			$this->loadedConfigs[$configName]=new ConfigElement($configName);
 		}
 		return $this->loadedConfigs[$configName];
 	}

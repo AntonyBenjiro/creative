@@ -5,6 +5,8 @@ namespace Core\DB;
 
 
 use Core\Config;
+use Core\DB;
+use Core\Entity\Field;
 use Core\Error\MySQLi;
 use Core\IFace\iDataManager;
 
@@ -35,7 +37,7 @@ class MySQLiManager implements iDataManager
 
 	public function __construct(){
 		$this->config=Config::get('DataManager');
-		$this->transactionsON=$this->config->value('transaction')?true:false;
+		$this->transactionsON=$this->config->value('transactions')?true:false;
 		$this->mysqli=new \mysqli(
 			$this->config->value('host'),
 			$this->config->value('user'),
@@ -55,6 +57,7 @@ class MySQLiManager implements iDataManager
 		if(!($result=$this->mysqli->query($q))){
 			throw new MySQLi($this->mysqli,$q);
 		}
+
 		return $result->fetch_assoc();
 	}
 
@@ -65,18 +68,10 @@ class MySQLiManager implements iDataManager
 	 * @throws \Exception
 	 */
 	public function saveData($dataClass,array $properties){
-		if($this->transactionsON&&!$this->transactionStarted){
-			$this->startTransaction();
-		}
 		$columns=implode('`,`',array_keys($properties));
 		$values=implode("','",array_values($properties));
 		$q="INSERT INTO `{$dataClass}` (`{$columns}`) VALUES('{$values}')";
-		$this->lastQueryResult=$this->mysqli->query($q);
-		if(!$this->lastQueryResult){
-			$this->revertTransaction();
-			throw new MySQLi($this->mysqli,$q);
-		}
-		return $this->lastQueryResult?true:false;
+		return $this->query($q)?true:false;
 	}
 
 	public function commit(){
@@ -103,5 +98,60 @@ class MySQLiManager implements iDataManager
 		if($this->transactionStarted){
 			$this->commit();
 		}
+	}
+
+	public static function updateTables(){
+		$dir=scandir($_SERVER['DOCUMENT_ROOT'].TABLES_CONFIG_DIR);
+		foreach($dir as $file){
+			if(is_file($_SERVER['DOCUMENT_ROOT'].TABLES_CONFIG_DIR.'/'.$file)){
+				$conf=new TableConfig(basename($file,'.ini'));
+				self::createTable($conf);
+				self::updateIndex($conf);
+			}
+		}
+	}
+
+	private static function updateIndex(TableConfig $config){
+		$db=DB::get();
+		foreach($config->getIndexDesc() as $indexName=>$desc){
+			$result=$db->query("SHOW INDEX FROM {$config->value('tableName')} WHERE Key_name='{$indexName}'");
+			if(!$result->num_rows){
+				$sql="CREATE ".($desc['type']=='unique'?'UNIQUE':'')
+					." INDEX {$indexName} ON {$config->value('tableName')}";
+			}
+		}
+	}
+
+	private static function createTable(TableConfig $config,$ifNotExists=true){
+		$sql="CREATE TABLE ".($ifNotExists?'IF NOT EXISTS':'')." `{$config->value('tableName')}`";
+		$fields=$d='';
+		foreach($config->value('fields') as $fieldName){
+			try{
+				$fieldDesc=$config->value($fieldName);
+				$field=MySQLiField::initField($fieldName,$fieldDesc);
+				$fields.=$d.PHP_EOL.$fieldName.' '.$field->getSQLColumnDefinition();
+			}catch(\Exception $e){
+				var_dump($e->getMessage());
+			}
+			$d=',';
+		}
+		$fields=$fields?"({$fields})":'';
+		return DB::get()->query($sql.$fields);
+	}
+
+	/**
+	 * @param $sql
+	 * @return bool|\mysqli_result
+	 * @throws MySQLi
+	 */
+	public function query($sql){
+		if($this->transactionsON&&!$this->transactionStarted){
+			$this->startTransaction();
+		}
+		$this->lastQueryResult=$this->mysqli->query($sql);
+		if(!$this->lastQueryResult){
+			throw new MySQLi($this->mysqli,$sql);
+		}
+		return $this->lastQueryResult;
 	}
 }

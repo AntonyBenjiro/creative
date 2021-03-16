@@ -1,0 +1,28 @@
+{
+  "tableName": "USER",
+  "fields": {
+    "LOGIN": {
+      "type": "text"
+    },
+    "EMAIL": {
+      "type": "text"
+    },
+    "NAME": {
+      "type": "text"
+    },
+    "PWD": {
+      "type": "password"
+    },
+    "ACTIVE": {
+      "type": "checkbox"
+    }
+  },
+  "indexes": {
+    "BY_EMAIL": {
+      "fields": {
+        "EMAIL": {"length": 64}
+      },
+      "type": "unique"
+    }
+  }
+}
