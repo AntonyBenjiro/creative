@@ -14,27 +14,28 @@ class Config
 	 */
 	private static $_instance;
 
+	/** @var ConfigElement[] */
 	private $loadedConfigs=array();
 
 	protected function __construct(){
 	}
 
-	public static function get($configName){
+	public static function get($relConfPath){
 		if(!self::$_instance){
 			self::$_instance=new self;
 		}
-		return self::$_instance->getConfig($configName);
+		return self::$_instance->getConfig($relConfPath);
 	}
 
 	/**
-	 * @param string $configName
+	 * @param string $relConfPath
 	 * @return iConfig
 	 * @throws \Exception
 	 */
-	private function getConfig($configName){
-		if(!isset($this->loadedConfigs[$configName])){
-			$this->loadedConfigs[$configName]=new ConfigElement($configName);
+	private function getConfig($relConfPath){
+		if(!isset($this->loadedConfigs[$relConfPath])){
+			$this->loadedConfigs[$relConfPath]=new ConfigElement($_SERVER['DOCUMENT_ROOT'].CONFIG_DIR.'/'.$relConfPath);
 		}
-		return $this->loadedConfigs[$configName];
+		return $this->loadedConfigs[$relConfPath];
 	}
 }

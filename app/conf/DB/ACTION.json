@@ -1,9 +1,20 @@
 {
   "tableName": "ACTION",
   "fields": {
-    "USER_ID": {},
-    "ACTION_TYPE_ID": {},
-    "TIMESTAMP": {},
-    "QUERY": {}
+    "USER_ID": {
+      "type": "relation",
+      "relationTable": "USER"
+    },
+    "ACTION_TYPE_ID": {
+      "type": "relation",
+      "relationTable": "ACTION_TYPE"
+    },
+    "TIMESTAMP": {
+      "type": "datetime",
+      "defaultValue": "CURRENT_TIMESTAMP"
+    },
+    "QUERY": {
+      "type": "longtext"
+    }
   }
 }

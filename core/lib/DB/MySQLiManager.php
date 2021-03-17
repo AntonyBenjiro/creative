@@ -103,8 +103,8 @@ class MySQLiManager implements iDataManager
 	public static function updateTables(){
 		$dir=scandir($_SERVER['DOCUMENT_ROOT'].TABLES_CONFIG_DIR);
 		foreach($dir as $file){
-			if(is_file($_SERVER['DOCUMENT_ROOT'].TABLES_CONFIG_DIR.'/'.$file)){
-				$conf=new TableConfig(basename($file,'.ini'));
+			if(is_file($_SERVER['DOCUMENT_ROOT'].TABLES_CONFIG_DIR.'/'.$file)&&preg_match('/\.json$/',$file)){
+				$conf=new TableConfig($_SERVER['DOCUMENT_ROOT'].TABLES_CONFIG_DIR.'/'.basename($file,'.json'));
 				self::createTable($conf);
 				self::updateIndex($conf);
 			}
@@ -113,21 +113,31 @@ class MySQLiManager implements iDataManager
 
 	private static function updateIndex(TableConfig $config){
 		$db=DB::get();
-		foreach($config->getIndexDesc() as $indexName=>$desc){
-			$result=$db->query("SHOW INDEX FROM {$config->value('tableName')} WHERE Key_name='{$indexName}'");
-			if(!$result->num_rows){
-				$sql="CREATE ".($desc['type']=='unique'?'UNIQUE':'')
-					." INDEX {$indexName} ON {$config->value('tableName')}";
+		$indexes=$config->value('indexes');
+		if($indexes)
+			foreach($indexes as $indexName=>$indexDesc){
+				$result=$db->query("SHOW INDEX FROM {$config->value('tableName')} WHERE Key_name='{$indexName}'");
+				if(!$result->num_rows){
+					$d=$fieldsDescStr='';
+					foreach($indexDesc['fields'] as $fieldName=>$fieldDesc){
+						$fieldsDescStr.=$d.$fieldName
+							.(isset($fieldDesc['length'])?" ({$fieldDesc['length']})":'');
+						$d=',';
+					}
+					$sql="CREATE ".($indexDesc['type']=='unique'?'UNIQUE':'')
+						." INDEX {$indexName} ON {$config->value('tableName')} ({$fieldsDescStr})";
+					return $db->query($sql);
+				}
+				return true;
 			}
-		}
+		return false;
 	}
 
 	private static function createTable(TableConfig $config,$ifNotExists=true){
 		$sql="CREATE TABLE ".($ifNotExists?'IF NOT EXISTS':'')." `{$config->value('tableName')}`";
 		$fields=$d='';
-		foreach($config->value('fields') as $fieldName){
+		foreach($config->value('fields') as $fieldName=>$fieldDesc){
 			try{
-				$fieldDesc=$config->value($fieldName);
 				$field=MySQLiField::initField($fieldName,$fieldDesc);
 				$fields.=$d.PHP_EOL.$fieldName.' '.$field->getSQLColumnDefinition();
 			}catch(\Exception $e){
