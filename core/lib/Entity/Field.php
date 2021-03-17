@@ -4,8 +4,6 @@
 namespace Core\Entity;
 
 
-use Core\IFace\iEntity;
-
 abstract class Field
 {
 
@@ -35,6 +33,13 @@ abstract class Field
 		return $this->required?true:false;
 	}
 
+	/**
+	 * @return string
+	 */
+	public function getFieldName(){
+		return $this->fieldName;
+	}
+
 	abstract protected function getDbType();
 	abstract public function getSQLColumnDefinition();
 	abstract protected static function getNamespace();
@@ -47,14 +52,33 @@ abstract class Field
 		return $this->value;
 	}
 
+	/**
+	 * @return mixed
+	 */
+	public function getRawValue(){
+		return $this->value;
+	}
+
+	/**
+	 * Value validation method
+	 * @todo must be abstracted in future
+	 * @param $value
+	 * @return $this
+	 */
+	public function setValue($value){
+		$this->value=$value;
+		return $this;
+	}
+
 
 	/**
 	 * @param $fieldName
 	 * @param array $fieldDesc
+	 * @param null $value
 	 * @return Field
 	 * @throws \Exception
 	 */
-	public static function initField($fieldName,array $fieldDesc){
+	public static function initField($fieldName,array $fieldDesc,$value=null){
 		$fieldClass=static::getNamespace().$fieldDesc['type'];
 		if(!class_exists($fieldClass)){
 			throw new \Exception("This field type not declared: '{$fieldDesc['type']}'");
@@ -62,6 +86,7 @@ abstract class Field
 		/** @var Field $field */
 		$field=new $fieldClass($fieldDesc);
 		$field->fieldName=$fieldName;
+		$field->value=$value;
 		return $field;
 	}
 }

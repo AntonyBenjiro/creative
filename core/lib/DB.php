@@ -4,6 +4,9 @@
 namespace Core;
 
 
+use Core\Entity\DataElement;
+use Core\Entity\Field;
+use Core\Entity\FieldsCollection;
 use Core\IFace\iDataManager;
 
 class DB
@@ -35,13 +38,11 @@ class DB
 	}
 
 	/**
-	 * @param string $dataClass
-	 * @param array $properties
-	 * @return bool
-	 * @throws \Exception
+	 * @param DataElement $dataElement
+	 * @return DataElement
 	 */
-	public function saveData($dataClass,array $properties){
-		return $this->dataManager->saveData($dataClass,$properties);
+	public function saveElement(DataElement $dataElement){
+		return $this->dataManager->saveElement($dataElement);
 	}
 
 	public function getData($dataClass,$idKey){
@@ -50,5 +51,9 @@ class DB
 
 	public function query($sql){
 		return $this->dataManager->query($sql);
+	}
+
+	public function getDataManager(){
+		return $this->dataManager;
 	}
 }

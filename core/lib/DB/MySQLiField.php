@@ -36,7 +36,7 @@ abstract class MySQLiField extends Field
 		$this->isNullable=isset($fieldDesc['nullable'])?$fieldDesc['nullable']:false;
 		$this->isPK=isset($fieldDesc['primary'])?$fieldDesc['primary']:false;
 		$this->isAutoincrement=isset($fieldDesc['auto_increment'])?$fieldDesc['auto_increment']:false;
-		$this->defaultValue=isset($fieldDesc['default'])?$fieldDesc['default']:'';
+		$this->defaultValue=isset($fieldDesc['defaultValue'])?$fieldDesc['defaultValue']:'';
 	}
 
 	public function isRequired(){
@@ -50,5 +50,12 @@ abstract class MySQLiField extends Field
 			.(!$this->isAutoincrement?'':' AUTO_INCREMENT ')
 			.(!$this->isPK?'':' PRIMARY KEY ');
 		return $sql;
+	}
+
+	/**
+	 * @return bool
+	 */
+	public function isPrimaryKey(){
+		return $this->isPK;
 	}
 }

@@ -15,6 +15,14 @@ class password extends MySQLiField
 		return "VARCHAR(255)";
 	}
 
+	public function getValue(){
+		return $this;
+	}
+
+	public function setValue($value){
+		return parent::setValue($this->encode($value));
+	}
+
 	/**
 	 * @todo remove from there to more abstracted entity
 	 * @deprecated
@@ -22,14 +30,14 @@ class password extends MySQLiField
 	 * @return false|string|null
 	 */
 	protected function encode($string){
-		return password_hash($string,PASSWORD_BCRYPT ,array('salt'=>$this->salt));
+		return password_hash($string,PASSWORD_BCRYPT );
 	}
 
 	/**
 	 * @todo remove from there to more abstracted entity
 	 * @deprecated
 	 * @param $string
-	 * @return checkbox
+	 * @return bool
 	 */
 	public function validate($string){
 		return password_verify($string,$this->value);

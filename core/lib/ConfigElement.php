@@ -10,12 +10,18 @@ class ConfigElement implements iConfig
 {
 
 	protected $values=array();
+
+	/** @var string */
 	private $configName;
 
-	public function __construct($configName,$configDir=CONFIG_DIR){
-		$configPath=$_SERVER['DOCUMENT_ROOT'].$configDir.'/'.$configName.'.ini';
-		if(!($values=parse_ini_file($configPath,true))){
-			throw new \Exception("Can't read values from '{$configPath}'");
+	public function __construct($configPath){
+		$configPath.='.json';
+		if(!is_file($configPath)||!preg_match('/(.*?)\/?([a-zA-Z0-9_-]+)\.json$/',$configPath,$m)){
+			throw new \Exception("Can't find config file");
+		}
+		$configName=$m[2];
+		if(!($values=json_decode(file_get_contents($configPath),true))){
+			throw new \Exception("Can't read values from '{$configName}'");
 		}
 		$this->values=$values;
 		$this->configName=$configName;
