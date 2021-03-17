@@ -6,9 +6,10 @@ namespace Core\DB;
 
 use Core\Config;
 use Core\DB;
-use Core\Entity\Field;
+use Core\Entity\DataElement;
 use Core\Error\MySQLi;
 use Core\IFace\iDataManager;
+use Core\ToolsString;
 
 class MySQLiManager implements iDataManager
 {
@@ -62,16 +63,25 @@ class MySQLiManager implements iDataManager
 	}
 
 	/**
-	 * @param $dataClass
-	 * @param array $properties
-	 * @return bool
+	 * @param DataElement $element
+	 * @return DataElement
+	 * @throws MySQLi
 	 * @throws \Exception
 	 */
-	public function saveData($dataClass,array $properties){
-		$columns=implode('`,`',array_keys($properties));
-		$values=implode("','",array_values($properties));
-		$q="INSERT INTO `{$dataClass}` (`{$columns}`) VALUES('{$values}')";
-		return $this->query($q)?true:false;
+	public function createElement(DataElement $element){
+		$keys=$values=array();
+		foreach($element->getValues() as $field){
+			$keys[]=$field->getFieldName();
+			$values[]=$field->getRawValue();
+		}
+		$columns=implode('`,`',$keys);
+		$values=implode("','",$values);
+		$q="INSERT INTO `{$element->dataClass()}` (`{$columns}`) VALUES('{$values}')";
+		if(!$this->query($q)){
+			throw new MySQLi($this->mysqli,$q);
+		}
+		$className=DataElement::getDefaultNamespace().'\\'.ToolsString::snakeToCamel($element->dataClass());
+		return new $className($this->getData($element->dataClass(),$this->mysqli->insert_id));
 	}
 
 	public function commit(){
@@ -133,9 +143,31 @@ class MySQLiManager implements iDataManager
 		return false;
 	}
 
+	public static function initField($fieldName,array $fieldDesc,$value=null){
+		return MySQLiField::initField($fieldName,$fieldDesc,$value);
+	}
+
 	private static function createTable(TableConfig $config,$ifNotExists=true){
 		$sql="CREATE TABLE ".($ifNotExists?'IF NOT EXISTS':'')." `{$config->value('tableName')}`";
 		$fields=$d='';
+		$pk=false;
+		foreach($config->value('fields') as $fieldName=>$fieldDesc){
+			if(isset($fieldDesc['primary'])&&$fieldDesc['primary']){
+				$pk=MySQLiField::initField($fieldName,$fieldDesc);
+			}
+		}
+		if(!$pk){
+			$fieldName=$config->value('tableName').'_ID';
+			$fieldDesc=array(
+				'primary'=>true,
+				'type'=>'integer',
+				'auto_increment'=>true,
+				'nullable'=>false
+			);
+			$pk=MySQLiField::initField($fieldName,$fieldDesc);
+		}
+		$fields.=$d.PHP_EOL.$pk->getFieldName().' '.$pk->getSQLColumnDefinition();
+		$d=',';
 		foreach($config->value('fields') as $fieldName=>$fieldDesc){
 			try{
 				$field=MySQLiField::initField($fieldName,$fieldDesc);
@@ -163,5 +195,38 @@ class MySQLiManager implements iDataManager
 			throw new MySQLi($this->mysqli,$sql);
 		}
 		return $this->lastQueryResult;
+	}
+
+	/**
+	 * @inheritDoc
+	 * @throws MySQLi
+	 */
+	public function saveElement(DataElement $dataElement){
+		if(!$dataElement->getPk()){
+			return $this->createElement($dataElement);
+		}
+		return $this->updateElement($dataElement);
+	}
+
+	/**
+	 * @param DataElement $dataElement
+	 * @return DataElement
+	 * @throws MySQLi
+	 * @throws \Exception
+	 */
+	public function updateElement(DataElement $dataElement){
+		$set='';
+		foreach($dataElement->getValues() as $field){
+			$set.="`{$field->getFieldName()}`='{$field->getRawValue()}'";
+		}
+		$q=<<<SQL
+UPDATE `{$dataElement->dataClass()}`
+SET {$set}
+WHERE `{$dataElement->dataClass()}_ID`={$dataElement->getPk()->getValue()}
+SQL;
+		if(!$this->query($q)){
+			throw new MySQLi($this->mysqli,$q);
+		}
+		return $dataElement;
 	}
 }

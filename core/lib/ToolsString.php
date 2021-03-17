@@ -19,6 +19,13 @@ abstract class ToolsString
 		return implode('_', $ret);
 	}
 
+	public static function snakeToCamel($string){
+		if(!is_string($string)){
+			throw new \Exception("Value not a string: '".gettype($string)."'");
+		}
+		return str_replace('_','',ucwords(strtolower($string),'_'));
+	}
+
 	public static function removeNamespaceFromClassName($classname){
 		$class=explode('\\',$classname);
 		return end($class);
