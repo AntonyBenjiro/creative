@@ -6,7 +6,6 @@ namespace Core\IFace;
 
 use Core\Entity\DataElement;
 use Core\Entity\Field;
-use Core\Entity\FieldsCollection;
 
 interface iDataManager
 {

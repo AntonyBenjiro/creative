@@ -5,8 +5,6 @@ namespace Core;
 
 
 use Core\Entity\DataElement;
-use Core\Entity\Field;
-use Core\Entity\FieldsCollection;
 use Core\IFace\iDataManager;
 
 class DB
