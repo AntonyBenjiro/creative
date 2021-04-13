@@ -44,12 +44,11 @@ abstract class MySQLiField extends Field
 	}
 
 	public function getSQLColumnDefinition(){
-		$sql=$this->getDbType()
+		return $this->getDbType()
 			.($this->isNullable?'':' NOT ').' NULL '
 			.(!$this->defaultValue?'':' DEFAULT '.$this->defaultValue)
 			.(!$this->isAutoincrement?'':' AUTO_INCREMENT ')
 			.(!$this->isPK?'':' PRIMARY KEY ');
-		return $sql;
 	}
 
 	/**
