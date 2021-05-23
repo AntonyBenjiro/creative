@@ -17,8 +17,6 @@
   },
   "require": {
     "ext-json": "*",
-    "ext-mysqli": "*",
-    "mongodb/mongodb": "^1.8",
-    "ext-mongodb": "^1.8"
+    "ext-mysqli": "*"
   }
 }
